@@ -1,0 +1,17 @@
+# Sanal ortam
+.venv/
+
+# Gizli bilgiler
+.env
+
+# Veri
+/data/
+
+# Python'un ürettiği geçici dosyalar
+__pycache__/
+.ipynb_checkpoints/
+
+# dbt'nin ürettiği dosyalar
+dbt/target/
+dbt/logs/
+dbt/.user.yml
