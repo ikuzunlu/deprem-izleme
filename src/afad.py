@@ -33,7 +33,17 @@ def afad_cek(baslangic: str, bitis: str, min_buyukluk: float = 0) -> pd.DataFram
     }
     cevap = requests.get(AFAD_URL, params=parametreler, timeout=30)
     cevap.raise_for_status()      # Sunucu hata verdiyse (404, 500...) burada dur
-    df = pd.DataFrame(cevap.json())
+    kayitlar = cevap.json()
+
+    if not kayitlar:
+        sure = pd.Timestamp(bitis) - pd.Timestamp(baslangic)
+        if sure >= pd.Timedelta(hours=24) and min_buyukluk <= 1:
+            # Türkiye'de 24 saat boyunca hiç küçük deprem olmaması neredeyse imkânsız: Bir sorun var
+            raise ValueError(f"AFAD {baslangic} -> {bitis} için hiç deprem döndürmedi. "
+                             "Servis çalışmıyor ya da erişim engellenmiş olabilir.")
+        return pd.DataFrame(columns=list(KOLONLAR.values()))  # Kısa aralıkta boş gelmesi normal
+
+    df = pd.DataFrame(kayitlar)
 
     # GÖREV 1: df'ten SADECE KOLONLAR sözlüğündeki kolonları seç ve yeni adlarıyla yeniden adlandır.
     #          İpucu: Sözlüğün anahtarları -> list(KOLONLAR), yeniden adlandırma -> .rename(columns=...)
